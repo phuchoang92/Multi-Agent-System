@@ -156,6 +156,7 @@ class Agent_Vacuum:
                 action = self.path_backtracking.pop(0)
                 x, y = up_down_lef_right[action](*self.coord)
                 self.coord = (x, y)
+                self.send_message["tiles"].append((x, y))
                 if len(self.path_backtracking) == 0:
                     self.mode = Mode.BOUSTROPHEDON
                 return action
