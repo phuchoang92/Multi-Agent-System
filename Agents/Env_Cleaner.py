@@ -69,7 +69,7 @@ class Env:
 
     def get_init_state(self):
         self.room_map = []
-        self.room_map = np.load('map.npy')
+        self.room_map = np.load('map1.npy')
         self.x_dim = len(self.room_map[0])
         self.y_dim = len(self.room_map)
         for i in range(len(self.agent)):
