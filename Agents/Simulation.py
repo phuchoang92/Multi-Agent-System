@@ -3,7 +3,7 @@ import time
 from Agents.Agent_Cleaner import Agent_Vacuum, Mode
 from Agents.Env_Cleaner import Env
 
-env = Env(obstacle_num=10, agent_position=[[1, 9], [10, 30]])
+env = Env(obstacle_num=10, agent_position=[[1, 9], [10, 30]], map_source="map1.nyc")
 agent1 = Agent_Vacuum(env, (0, 0))
 agent2 = Agent_Vacuum(env, (21, -9))
 group_agent = [agent1, agent2]

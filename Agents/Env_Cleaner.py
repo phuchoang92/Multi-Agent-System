@@ -6,7 +6,7 @@ class Env:
     actions = ["up", "down", "left", "right"]
     states = ["MOVING", "DO_NOTHING"]
 
-    def __init__(self, x_dim=20, y_dim=20, obstacle_num=10, agent_position=[]):
+    def __init__(self, x_dim=20, y_dim=20, obstacle_num=10, agent_position=[], map_source=None):
         self.x_dim = x_dim
         self.y_dim = y_dim
         self.obstacle_pos = []
@@ -17,6 +17,7 @@ class Env:
         self.obstacle_num = obstacle_num
         self.room_map = np.zeros((self.x_dim, self.y_dim))
         self.get_init_state()
+        self.map_source = map_source
         self.cleaner_state = None
 
     def step(self, action=None):
@@ -69,7 +70,7 @@ class Env:
 
     def get_init_state(self):
         self.room_map = []
-        self.room_map = np.load('map1.npy')
+        self.room_map = np.load(self.map_source)
         self.x_dim = len(self.room_map[0])
         self.y_dim = len(self.room_map)
         for i in range(len(self.agent)):
