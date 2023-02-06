@@ -105,9 +105,10 @@ class Agent_Vacuum:
         if len(backtrack_points) == 0:
             return []
         if self.coordinate_same_area:
-            for i, pair in enumerate(backtrack_points):
-                if pair[0] == self.received_critical_point[0] and pair[1] == self.received_critical_point[1]:
-                    np.delete(backtrack_points, i)
+            if len(self.received_critical_point) != 0:
+                for i, pair in enumerate(backtrack_points):
+                    if pair[0] == self.received_critical_point[0] and pair[1] == self.received_critical_point[1]:
+                        np.delete(backtrack_points, i)
             if len(backtrack_points) == 0:
                 return []
             closest_point_idx = ((backtrack_points - np.array(self.coord)) ** 2).sum(axis=1).argmin()
