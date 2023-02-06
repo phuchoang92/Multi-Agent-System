@@ -16,8 +16,8 @@ class Env:
         self.direction = "SOUTH"
         self.obstacle_num = obstacle_num
         self.room_map = np.zeros((self.x_dim, self.y_dim))
-        self.get_init_state()
         self.map_source = map_source
+        self.get_init_state()
         self.cleaner_state = None
 
     def step(self, action=None):
