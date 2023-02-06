@@ -106,7 +106,7 @@ class Agent_Vacuum:
             return []
         if self.coordinate_same_area:
             for i, pair in enumerate(backtrack_points):
-                if pair == self.received_critical_point:
+                if pair[0] == self.received_critical_point[0] and pair[1] == self.received_critical_point[1]:
                     np.delete(backtrack_points, i)
             if len(backtrack_points) == 0:
                 return []
