@@ -10,7 +10,6 @@ group_agent = [agent1, agent2]
 perceive = env.step()
 
 while True:
-    # time.sleep(0.1)
     env.render()
     actions = []
     for i, agent in enumerate(group_agent):

@@ -91,11 +91,14 @@ class Env:
                     cv2.rectangle(self.room, (i * rectangle_size, j * rectangle_size),
                                   (i * rectangle_size + rectangle_size, j * rectangle_size + rectangle_size),
                                   (255, 0, 0), -1)
-                if (i == self.agent[0][0] and j == self.agent[0][1]) or (
-                        i == self.agent[1][0] and j == self.agent[1][1]):
+                if i == self.agent[0][0] and j == self.agent[0][1]:
                     cv2.rectangle(self.room, (i * rectangle_size, j * rectangle_size),
                                   (i * rectangle_size + rectangle_size, j * rectangle_size + rectangle_size),
                                   (0, 255, 0), -1)
+                if i == self.agent[1][0] and j == self.agent[1][1]:
+                    cv2.rectangle(self.room, (i * rectangle_size, j * rectangle_size),
+                                  (i * rectangle_size + rectangle_size, j * rectangle_size + rectangle_size),
+                                  (0, 255, 255), -1)
 
         cv2.imshow("Cleaner Agent", self.room)
         cv2.waitKey(1)

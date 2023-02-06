@@ -5,12 +5,13 @@ up_down_lef_right = {
     "right": lambda x, y: (x + 1, y)
 }
 
+
 def heuristic(start, goal):
     D = 1
     D2 = 1
     dx = abs(start[0] - goal[0])
     dy = abs(start[1] - goal[1])
-    return D * (dx + dy) + (D2 - 2 * D) * min(dx, dy)
+    return D * (dx + dy)
 
 
 def get_vertex_neighbours(pos, graph):
@@ -69,7 +70,7 @@ def astar_search(start, end, graph):
                 continue  # This G score is worse than previously found
 
             # Adopt this G score
-            cameFrom[neighbour] = (current,direc)
+            cameFrom[neighbour] = (current, direc)
             G[neighbour] = candidateG
             H = heuristic(neighbour, end)
             F[neighbour] = G[neighbour] + H
