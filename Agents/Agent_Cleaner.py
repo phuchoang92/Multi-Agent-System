@@ -8,6 +8,7 @@ class Mode(Enum):
     BOUSTROPHEDON = 1,
     A_SEARCH = 2,
     AVOIDING = 3
+    STOP = 4
 
 
 up_down_lef_right = {
@@ -45,7 +46,6 @@ class Agent_Vacuum:
             "tiles": [],
             "backtracking_point": []
         }
-        self.send_message["tiles"].append(self.coord)
         self.other_agent_pos = []
         self.other_agent_tile_cleaned = []
         self.receive_message = {}
@@ -57,13 +57,15 @@ class Agent_Vacuum:
 
     def process_perceive(self):
         for direction in self.perceive:
+            x, y = calculate_neighbors[direction](*self.coord)
             if self.perceive[direction] == 2:
-                x, y = calculate_neighbors[direction](*self.coord)
                 if (x, y) not in self.obstacles:
                     self.obstacles.append((x, y))
                     self.send_message["obstacles"].append((x, y))
-                if (x, y) == self.other_agent_pos and direction in up_down_lef_right:
-                    self.mode = Mode.AVOIDING
+            if (x, y) == self.other_agent_pos and direction in up_down_lef_right:
+                self.mode = Mode.AVOIDING
+        if not self.mode == Mode.A_SEARCH or not self.coordinate_same_area:
+            self.send_message["tiles"].append(self.coord)
 
     def boustrophedon_motion(self):
 
@@ -71,8 +73,8 @@ class Agent_Vacuum:
         while len(direct) > 0:
             d_ = direct.pop(0)
             x_, y_ = up_down_lef_right[d_](self.coord[0], self.coord[1])
-            if self.perceive[d_] != 2 and (x_, y_) not in self.tile_visited and (
-                    x_, y_) not in self.other_agent_tile_cleaned:
+            if self.perceive[d_] != 2 and (x_, y_) not in self.tile_visited \
+                    and (x_, y_) not in self.other_agent_tile_cleaned:
                 self.coord = (x_, y_)
                 self.visit(x_, y_)
                 return d_
@@ -120,11 +122,9 @@ class Agent_Vacuum:
     def select_action(self):
         if self.mode == Mode.BOUSTROPHEDON:
             action = self.boustrophedon_motion()
-            return action
-        elif self.mode == Mode.A_SEARCH:
-            if len(self.path_backtracking) == 0:
+            if action == "STAY":
                 self.critical_point = self.backtracking_list(self.tile_visited)
-                if len(self.critical_point) == 0:
+                if len(self.critical_point) == 0 and not self.coordinate_same_area:
                     self.critical_point = self.backtracking_list(self.other_agent_tile_cleaned)
                     self.finished_my_path = True
                     self.coordinate_same_area = True
@@ -152,21 +152,21 @@ class Agent_Vacuum:
                         map = self.tile_visited
                     self.path_backtracking = astar_search(self.coord, tuple(self.critical_point), map)
                 else:
-                    return "end"
-            else:
-                action = self.path_backtracking.pop(0)
-                x, y = up_down_lef_right[action](*self.coord)
-                self.coord = (x, y)
-                self.send_message["tiles"].append((x, y))
-                if len(self.path_backtracking) == 0:
-                    self.mode = Mode.BOUSTROPHEDON
-                return action
+                    self.mode = Mode.STOP
+                    return "STAY"
+            return action
+        elif self.mode == Mode.A_SEARCH:
+            action = self.path_backtracking.pop(0)
+            x, y = up_down_lef_right[action](*self.coord)
+            self.coord = (x, y)
+            if len(self.path_backtracking) == 0:
+                self.mode = Mode.BOUSTROPHEDON
+            return action
         else:
             return "stay"
 
     def visit(self, x, y):
         self.tile_visited.append((x, y))
-        self.send_message["tiles"].append((x, y))
         return x, y
 
     def send(self, agent):
