@@ -100,5 +100,6 @@ class Env:
                                   (i * rectangle_size + rectangle_size, j * rectangle_size + rectangle_size),
                                   (0, 255, 255), -1)
 
+        # return  self.room
         cv2.imshow("Cleaner Agent", self.room)
         cv2.waitKey(1)

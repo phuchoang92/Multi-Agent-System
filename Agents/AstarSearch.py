@@ -14,17 +14,17 @@ def heuristic(start, goal):
     return D * (dx + dy)
 
 
-def get_vertex_neighbours(pos, graph):
+def get_vertex_neighbours(pos, graph, exception_point):
     n = []
     for direc in {"right", "left", "up", "down"}:
         x2, y2 = up_down_lef_right[direc](*pos)
-        if (x2, y2) not in graph:
+        if (x2, y2) not in graph or (x2, y2) == exception_point:
             continue
         n.append(((x2, y2), direc))
     return n
 
 
-def astar_search(start, end, graph):
+def astar_search(start, end, graph, exception_point):
     G = {}  # Actual movement cost to each position from the start position
     F = {}  # Estimated movement cost of start to end going via this position
 
@@ -58,7 +58,7 @@ def astar_search(start, end, graph):
         closedVertices.add(current)
 
         # Update scores for vertices near the current position
-        for neighbour, direc in get_vertex_neighbours(current, graph):
+        for neighbour, direc in get_vertex_neighbours(current, graph, exception_point):
             if neighbour in closedVertices:
                 continue  # We have already processed this node exhaustively
             candidateG = G[current] + 1

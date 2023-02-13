@@ -9,6 +9,8 @@ class Mode(Enum):
     A_SEARCH = 2,
     AVOIDING = 3
     STOP = 4
+    WAIT = 5
+    CONTINUE = 6
 
 
 up_down_lef_right = {
@@ -46,6 +48,7 @@ class Agent_Vacuum:
             "tiles": [],
             "backtracking_point": []
         }
+        self.last_mode = None
         self.other_agent_pos = []
         self.other_agent_tile_cleaned = []
         self.receive_message = {}
@@ -62,10 +65,16 @@ class Agent_Vacuum:
                 if (x, y) not in self.obstacles:
                     self.obstacles.append((x, y))
                     self.send_message["obstacles"].append((x, y))
-            if (x, y) == self.other_agent_pos and direction in up_down_lef_right:
+            if (x, y) == self.other_agent_pos and self.mode != Mode.CONTINUE:
                 self.mode = Mode.AVOIDING
         if not self.mode == Mode.A_SEARCH or not self.coordinate_same_area:
             self.send_message["tiles"].append(self.coord)
+
+    def other_agent_around(self):
+        for direction in self.perceive:
+            x, y = calculate_neighbors[direction](*self.coord)
+            if (x, y) == self.other_agent_pos:
+                return True
 
     def boustrophedon_motion(self):
 
@@ -73,8 +82,8 @@ class Agent_Vacuum:
         while len(direct) > 0:
             d_ = direct.pop(0)
             x_, y_ = up_down_lef_right[d_](self.coord[0], self.coord[1])
-            if self.perceive[d_] != 2 and (x_, y_) not in self.tile_visited \
-                    and (x_, y_) not in self.other_agent_tile_cleaned:
+            if self.perceive[d_] not in self.obstacles and (x_, y_) not in self.tile_visited \
+                    and (x_, y_) not in self.other_agent_tile_cleaned and (x_, y_) != self.other_agent_pos:
                 self.coord = (x_, y_)
                 self.visit(x_, y_)
                 return d_
@@ -150,7 +159,7 @@ class Agent_Vacuum:
                         self.finished_my_path = False
                     else:
                         map = self.tile_visited
-                    self.path_backtracking = astar_search(self.coord, tuple(self.critical_point), map)
+                    self.path_backtracking = astar_search(self.coord, tuple(self.critical_point), map, self.other_agent_pos)
                 else:
                     self.mode = Mode.STOP
                     return "STAY"
@@ -162,6 +171,13 @@ class Agent_Vacuum:
             if len(self.path_backtracking) == 0:
                 self.mode = Mode.BOUSTROPHEDON
             return action
+        elif self.mode == Mode.WAIT:
+            if not self.other_agent_around():
+                self.mode = Mode.BOUSTROPHEDON
+            return "stay"
+        elif self.mode == Mode.CONTINUE:
+            self.mode = self.last_mode
+            return self.select_action()
         else:
             return "stay"
 
@@ -196,4 +212,6 @@ class Agent_Vacuum:
             self.coordinate_same_area = self.receive_message["cooperation"]
 
     def resolve_collide(self, agent):
-        agent.mode = Mode.AVOIDING
+        agent.last_mode = agent.mode
+        agent.mode = Mode.CONTINUE
+        self.mode = Mode.WAIT
